@@ -1,4 +1,4 @@
 .vscode/*
-__pycache_/*
-fun_a_holics/__pycache_/*
+__pycache__/*
+fun_a_holics/__pycache__/*
 .ipynb_checkpoints/*
