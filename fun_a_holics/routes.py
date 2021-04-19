@@ -6,6 +6,7 @@ from fun_a_holics.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
 from fun_a_holics.models import User, Event
 from fun_a_holics import app, bcrypt, db
 from flask_login import login_user, current_user, logout_user, login_required
+from db_operations import dbconnection
 
 @app.route('/')
 @app.route('/home')
@@ -25,9 +26,9 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username = form.username.data, email = form.email.data, password = hashed_password)
-        db.session.add(user)
-        db.session.commit()
+        database = dbconnection()
+        insert_query = "INSERT INTO users(username, password, email_id, age) VALUES (%s, %s, %s, %s)"
+        database.insert((form.username.data, hashed_password, form.email.data, form.age.data),insert_query)
         flash(f'Your account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
