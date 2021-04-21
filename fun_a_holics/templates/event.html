@@ -6,16 +6,44 @@
         <div class="media-body">
         <div class="article-metadata">
             <a class="mr-2" href="{{ url_for('user_events', username=event.author.username) }}">{{ event.author.username }}</a>
-            <small class="text-muted">{{ event.date_added.strftime('%Y-%m-%d') }}</small>
-            {% if event.author == current_user %}
+            <small class="text-muted">{{ event.time_created.strftime('%Y-%m-%d') }}</small>
+            {% if event.created_by == current_user.username %}
             <div>
-                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_event', event_id = event.id) }}">Update</a>
-                <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete</button>
+                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_event', event_id = event.event_id) }}">Update</a>
+                <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Cancel</button>
             </div>
             {% endif %}
         </div>
-        <h2 class="article-title">{{ event.title }}</h2>
-        <p class="article-content">{{ event.description }}</p>
+        <h2 class="article-title">{{ event.event_name }}</h2>
+        <p class="article-content">{{ event.event_description }}</p>
+        <p class="article-content">Event Category: {{ event.event_category }}</p>
+        {% if event.event_freq %}
+        <p class="article-content">Event Frequency {{ event.event_freq }}</p>
+        {% endif %}
+        <p class="article-content">Event is scheduled from {{ event.start_date }} to {{ event.end_date }}</p>
+        {% if event.cost_per_person>0 %}
+        <p class="article-content">Event cost per person: {{ event.cost_per_person }}</p>
+        {% endif %}
+        {% if event.link_to_connect %}
+        <p class="article-content">Event link: {{ event.link_to_connect }}</p>
+        {% endif %}
+        {% if event.max_capacity %}
+        <p class="article-content">Maximum number of participants: {{ event.max_capacity }}</p>
+        {% endif %}
+        {% if event.location %}
+        <span class="article">{{ event.criteria }} {{ event.location }} event 
+        {% if event.event_city and event.event_city!='online' %}
+        at {{ event.event_city }} {{ event.event_state }}</span>
+        {% endif %}
+        {% endif %}
+        {% if event.min_age %}
+        <p class="article-content">Age Limit {{ event.min_age }} - {{ event.max_age }}</p>
+        {% endif %}
+        {% if event.covid_test %}
+        <p class="article-content">Please, get your negative covid reports with you.</p>
+        {% else %}
+        <p class="article-content">You need not worry about Covid'19 for this event!!!</p>
+        {% endif %}
         </div>
     </article>
     <!-- Modal -->
@@ -23,15 +51,15 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="deleteModalLabel">Delete event?</h5>
+              <h5 class="modal-title" id="deleteModalLabel">Cancel event?</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <form action="{{ url_for('delete_event',event_id=event.id) }}" method="event">
-                <input type="submit" class="btn btn-danger" value="Delete">
+              <form action="{{ url_for('delete_event',event_id=event.event_id) }}" method="post">
+                <input type="submit" class="btn btn-danger" value="Cancel">
               </form>
             </div>
           </div>

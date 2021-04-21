@@ -6,15 +6,16 @@ from fun_a_holics.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
 from fun_a_holics.models import User, Event
 from fun_a_holics import app, bcrypt, db, current_user
 from flask_login import login_user, logout_user, login_required
-from db_operations import dbconnection
+from functions import *
 
 @app.route('/')
 @app.route('/home')
 def home():
     # page = request.args.get('page', 1, type=int)
     # events = Event.query.order_by(Event.date_added.desc()).paginate(per_page=5, page = page)
-    events = None
-    return render_template('home.html', events=events, current_user = current_user)
+
+    events = select_all_events_active()
+    return render_template('home.html', events=events, current_user = current_user, user=None)
 
 @app.route('/about')
 def about():
@@ -30,9 +31,7 @@ def register():
             flash('Email/Username already exists!', 'danger')
             return render_template('register.html', title='Register', form=form)
         # hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        database = dbconnection()
-        insert_query = "INSERT INTO users(username, password, email_id, age) VALUES (%s, %s, %s, %s)"
-        database.insert((form.username.data, form.password.data, form.email.data, form.age.data),insert_query)
+        insert_user(form.username.data, form.password.data, form.email.data, form.age.data)
         flash(f'Your account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
@@ -44,16 +43,13 @@ def login():
         return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
-        database = dbconnection()
-        login_query = "select * from users where email_id = %s"
-        user = database.get_result_from_query((form.email.data,),login_query)
+        user = select_user_email_id(form.email.data)
         # user = User.query.filter_by(email = form.email.data).first()
         print(user)
-        # if user and bcrypt.check_password_hash(user[0]["password"],  form.password.data):
-        if user and user[0]["password"]==form.password.data:
-           user_model = User(username = user[0]["username"], email_id = user[0]["email_id"], password = user[0]["password"], image_file = user[0]["image_file"], age = user[0]["age"])
-           login_user(user_model, remember = form.remember.data)
-           current_user = user_model
+        # if user and bcrypt.check_password_hash(user["password"],  form.password.data):
+        if user and user.password==form.password.data:
+        #    login_user(user_model, remember = form.remember.data)
+           current_user = user
            current_user.is_authenticated = True
            current_user.is_active = True
            next_page = request.args.get('next')
@@ -83,18 +79,14 @@ def save_picture(form_picture):
     return picture_fn
 
 def validate_username(username):
-    database = dbconnection()
-    query = "select * from users where username = %s"
-    user = database.get_result_from_query((username,),query)
-    if len(user)>0:
+    user = select_user_username(username)
+    if user:
         return True
     return False
 
 def validate_email(email):
-    database = dbconnection()
-    query = "select * from users where email_id = %s"
-    user = database.get_result_from_query((email,),query)
-    if len(user)>0:
+    user = select_user_email_id(email)
+    if user:
         return True
     return False
 
@@ -113,10 +105,7 @@ def account():
         current_user.username = form.username.data
         current_user.email_id = form.email.data
         current_user.age = form.age.data
-        # db.session.commit()
-        database = dbconnection()
-        update_query = "UPDATE users SET age=%s, email_id=%s, image_file=%s WHERE username=%s"
-        user = database.update((current_user.age, current_user.email_id,current_user.image_file,current_user.username),update_query)
+        update_user(current_user.age, current_user.email_id,current_user.image_file,current_user.username)
         flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))
     elif request.method == 'GET':        
@@ -132,53 +121,69 @@ def new_event():
         return redirect(url_for('home'))
     form = EventForm()
     if form.validate_on_submit():
+        print(form)
+        insert_event(form.event_name.data, current_user.username, form.event_category.data, form.start_date.data, form.end_date.data, form.cost_per_person.data, form.link_to_connect.data, form.max_capacity.data, form.location.data, form.criteria.data, form.event_description.data , form.min_age.data, form.max_age.data , form.event_city.data , form.event_state.data , form.covid_test.data)
         # event = Event(title = form.title.data, description = form.description.data, author = current_user)
         # db.session.add(event)
         # db.session.commit()
-        database = dbconnection()
-        insert_query = "insert into events(event_name, created_by, event_category, start_date, end_date, cost_per_person, link_to_connect, max_capacity, location, criteria, event_description , event_status, min_age, max_age , event_city , event_state , covid_test) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-        database.insert((form.title.data, form.description.data, form.email.data, form.age.data),insert_query)
+        # event_name, created_by, event_category, start_date, end_date, cost_per_person, link_to_connect, max_capacity, location, criteria, event_description , event_status, min_age, max_age , event_city , event_state , covid_test
         flash(f'Your event has been created!', 'success')
         return redirect(url_for('home'))
     return render_template('create_event.html', title='New Event', form = form, legend = 'New Event', current_user = current_user)
 
-@app.route('/event/<int:event_id>')
+@app.route('/event/<int:event_id>', methods = ['GET', 'POST'])
 def event(event_id):
-    event = Event.query.get_or_404(event_id)
-    return render_template('event.html', title=event.title,event=event, current_user = current_user)
+    print('In Event ', event_id)
+    event = select_event_event_id(event_id)
+    return render_template('event.html', title=event.event_name,event=event, current_user = current_user)
 
 @app.route('/event/<int:event_id>/update', methods = ['GET', 'POST'])
 def update_event(event_id):
-    event = Event.query.get_or_404(event_id)
-    if event.author != current_user:
+    if not current_user or not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    event = select_event_event_id(event_id)
+    print(event)
+    if event.created_by!= current_user.username:
         abort(403)
     form = EventForm()
     if form.validate_on_submit():
-        event.title = form.title.data
-        event.description = form.description.data
-        db.session.commit()
+        update_event_event_id(form.event_name.data, current_user.username, form.event_category.data, form.start_date.data, form.end_date.data, form.cost_per_person.data, form.link_to_connect.data, form.max_capacity.data, form.location.data, form.criteria.data, form.event_description.data , form.min_age.data, form.max_age.data , form.event_city.data , form.event_state.data , form.covid_test.data, event_id)
         flash('Your event has been updated!', 'success')
-        return redirect(url_for('event',event_id=event.id))
+        return redirect(url_for('event',event_id=event.event_id))
     elif request.method == 'GET':
-        form.title.data = event.title
-        form.description.data = event.description
+        form.event_name.data = event.event_name
+        form.event_category.data = event.event_category
+        form.start_date.data = event.start_date
+        form.end_date.data = event.end_date
+        form.cost_per_person.data = event.cost_per_person
+        form.link_to_connect.data = event.link_to_connect
+        form.max_capacity.data = event.max_capacity
+        form.location.data = event.location
+        form.criteria.data = event.criteria
+        form.event_description.data = event.event_description
+        form.min_age.data = event.min_age
+        form.max_age.data = event.max_age
+        form.event_city.data = event.event_city
+        form.event_state.data = event.event_state
+        form.covid_test.data = event.covid_test
     return render_template('create_event.html', title='Update Event',event=event, form = form, legend = 'Update Event')
 
 @app.route('/event/<int:event_id>/delete', methods = ['POST'])
 def delete_event(event_id):
-    event = Event.query.get_or_404(event_id)
-    if event.author != current_user:
+    if not current_user or not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    event = select_event_event_id(event_id)
+    if event.created_by!= current_user.username:
         abort(403)
-    db.session.delete(event)
-    db.session.commit()
-    flash('Your event has been deleted!', 'success')
+    cancel_event_event_id(event_id)
+    flash('Your event has been cancelled!', 'success')
     return redirect(url_for('home'))
 
 @app.route('/user/<string:username>')
 def user_events(username):
-    page = request.args.get('page', 1, type=int)
-    user = User.query.filter_by(username=username).first_or_404()
-    events = Event.query.filter_by(author=user)\
-        .order_by(Event.date_added.desc())\
-        .paginate(per_page=5, page = page)
-    return render_template('user_events.html', events=events, user=user)
+    # page = request.args.get('page', 1, type=int)
+    user = select_user_username(username)
+    if not user:
+        abort(403)
+    events = select_all_events_username(username)
+    return render_template('home.html', events=events, current_user = current_user, user=user, total = len(events))
