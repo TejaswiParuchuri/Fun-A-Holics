@@ -6,7 +6,7 @@
     {% endif %}
     {% for event in events %}
         <article class="media content-section">
-            <img class="rounded-circle article-img" src="{{ url_for('static', filename='Profile_pics/'+event.author.image_file) }}" alt="">
+            <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/'+event.author.image_file) }}" alt="">
             <div class="media-body">
             <div class="article-metadata">
                 <a class="mr-2" href="{{ url_for('user_events', username=event.author.username) }}">{{ event.author.username }}</a>
