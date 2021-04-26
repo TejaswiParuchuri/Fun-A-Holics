@@ -2,7 +2,7 @@
 
 {% block content %}
     {% if user.username %}
-    <h1 class="mb-3">Events by {{ user.username }} ({{ total }}) </h1>
+    <h1 class="mb-3">Events {{ action }} by {{ user.username }} ({{ total }}) </h1>
     {% endif %}
     {% for event in events %}
         <article class="media content-section">

@@ -2,20 +2,23 @@ import secrets, os
 from PIL import Image
 from flask import abort,render_template, url_for, flash, redirect, request
 from fun_a_holics.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
-                             EventForm)
+                             EventForm,JoinEventForm)
 from fun_a_holics.models import User, Event
 from fun_a_holics import app, bcrypt, db, current_user
 from flask_login import login_user, logout_user, login_required
 from functions import *
+
+# current_user = select_user_username('Akshay')
+# current_user.is_authenticated = True
+# current_user.is_active = True
 
 @app.route('/')
 @app.route('/home')
 def home():
     # page = request.args.get('page', 1, type=int)
     # events = Event.query.order_by(Event.date_added.desc()).paginate(per_page=5, page = page)
-
     events = select_all_events_active()
-    return render_template('home.html', events=events, current_user = current_user, user=None)
+    return render_template('home.html', events=events, action="created", current_user = current_user, user=None)
 
 @app.route('/about')
 def about():
@@ -134,8 +137,13 @@ def new_event():
 @app.route('/event/<int:event_id>', methods = ['GET', 'POST'])
 def event(event_id):
     print('In Event ', event_id)
+    join_disable = False
+    if current_user:
+        user_participation = select_user_participation_username_event_id(current_user.username,event_id)
+        if user_participation:
+            join_disable = True
     event = select_event_event_id(event_id)
-    return render_template('event.html', title=event.event_name,event=event, current_user = current_user)
+    return render_template('event.html', title=event.event_name,event=event, current_user = current_user, join_disable = join_disable)
 
 @app.route('/event/<int:event_id>/update', methods = ['GET', 'POST'])
 def update_event(event_id):
@@ -166,7 +174,7 @@ def update_event(event_id):
         form.event_city.data = event.event_city
         form.event_state.data = event.event_state
         form.covid_test.data = event.covid_test
-    return render_template('create_event.html', title='Update Event',event=event, form = form, legend = 'Update Event')
+    return render_template('create_event.html', title='Update Event', current_user = current_user, event=event, form = form, legend = 'Update Event')
 
 @app.route('/event/<int:event_id>/delete', methods = ['POST'])
 def delete_event(event_id):
@@ -186,4 +194,54 @@ def user_events(username):
     if not user:
         abort(403)
     events = select_all_events_username(username)
-    return render_template('home.html', events=events, current_user = current_user, user=user, total = len(events))
+    return render_template('home.html', events=events, action="created", current_user = current_user, user=user, total = len(events))
+
+@app.route('/event/<int:event_id>/join', methods = ['GET', 'POST'])
+def join_event(event_id):
+    if not current_user or not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    event = select_event_event_id(event_id)
+    print(event)
+    if event.created_by== current_user.username:
+        abort(403)
+    form = JoinEventForm()
+    # form.age.data = current_user.age
+    if form.validate_on_submit():
+        if current_user.age not in range(event.min_age,event.max_age+1) or form.covid_status.data!=event.covid_test:
+            flash('You cannot join the '+ str(event.event_name)  +' event as you don\'t satisfy the requirements!', 'danger')
+        else:
+            insert_user_participation(current_user.username,event.event_id,form.covid_status.data)
+            flash('Your have successfully joined the '+ str(event.event_name)  +' event!', 'success')
+        return redirect(url_for('event',event_id=event.event_id))
+
+    return render_template('join_event.html', title='Join Event',event=event, current_user = current_user, form = form, legend = 'Join Event')
+
+@app.route('/events/myevents')
+def my_events():
+    if not current_user or not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    username = current_user.username
+    user = select_user_username(username)
+    if not user:
+        abort(403)
+    events = select_all_events_username(username)
+    return render_template('home.html', events=events, action="created", current_user = current_user, user=user, total = len(events))
+
+@app.route('/events/events_joined')
+def events_joined():
+    if not current_user or not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    username = current_user.username
+    user = select_user_username(username)
+    if not user:
+        abort(403)
+    events = select_all_joined_events(username)
+    return render_template('home.html', events=events,action="joined", current_user = current_user, user=user, total = len(events))
+
+@app.route('/event/<int:event_id>/deregister', methods = ['POST'])
+def deregister_event(event_id):
+    if not current_user or not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    deregister_event_event_id(current_user.username,event_id)
+    flash('You have deregistered from the event!', 'success')
+    return redirect(url_for('home'))

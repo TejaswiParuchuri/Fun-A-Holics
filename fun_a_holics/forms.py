@@ -63,3 +63,9 @@ class EventForm(FlaskForm):
     event_state  =  StringField('Event State', validators=[Length(min=2, max=10)])
     covid_test =  BooleanField('Covid test required')
     submit = SubmitField('Post Event')
+
+
+class JoinEventForm(FlaskForm):
+    # age = IntegerField('Age',render_kw={'disabled':''}, validators=[DataRequired(), NumberRange(max=60, message="Max age is 60 years")])
+    covid_status =  BooleanField('Do you have a Covid -ve PCR test result?')
+    submit = SubmitField('Join')

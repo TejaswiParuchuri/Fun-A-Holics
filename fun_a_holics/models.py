@@ -46,6 +46,19 @@ class Event():
     def __repr__(self):
         return f"Event('{self.event_id}','{self.event_name}','{self.time_created}')"
 
+class UserParticipation():
+    def __init__(self, username, event_id, time_registered, time_modified, joining_status, covid_status):
+        self.username = username
+        self.event_id = event_id
+        self.time_registered = time_registered
+        self.time_modified = time_modified
+        self.joining_status = joining_status
+        self.covid_status = covid_status
+
+    def __repr__(self):
+        return f"User('{self.username}','{self.event_id}','{self.joining_status}')"
+
+
 # class User(db.Model, UserMixin):
 #     age = db.Column(db.Integer)
 #     username = db.Column(db.String(20), unique = True, nullable = False, primary_key=True)

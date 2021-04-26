@@ -1,5 +1,5 @@
 from db_operations import dbconnection
-from fun_a_holics.models import User, Event
+from fun_a_holics.models import User, Event, UserParticipation
 
 def insert_user(username, password, email_id, age):
     values = tuple([username, password, email_id, age])
@@ -81,3 +81,37 @@ def cancel_event_event_id(event_id):
     database = dbconnection()
     delete_query = "update events set event_status = 'cancelled' where event_id = %s"
     database.update((event_id,),delete_query)
+
+
+def insert_user_participation(username, event_id, covid_status):
+    values = tuple([username, event_id, covid_status])
+    database = dbconnection()
+    insert_query = "INSERT INTO user_participation(username, event_id, covid_status) VALUES (%s, %s, %s)"
+    database.insert(values,insert_query)
+
+def select_user_participation_username_event_id(username, event_id):
+    database = dbconnection()
+    login_query = "select * from user_participation where username = %s and event_id = %s limit 1"
+    user_participation = database.get_result_from_query((username,event_id,),login_query)
+    user_participation =  user_participation[0] if user_participation else None
+    if user_participation:
+        user_participation = UserParticipation(user_participation['username'], user_participation['event_id'], user_participation['time_registered'], user_participation['time_modified'], user_participation['joining_status'], user_participation['covid_status'])
+    return user_participation
+
+def select_all_joined_events(username):
+    database = dbconnection()
+    login_query = "select * from events where event_status = %s  and event_id in (select event_id from user_participation where username=%s)"
+    events = database.get_result_from_query(('active', username),login_query)
+    event_objects = []
+    if events:
+        for event in events:
+            author = select_user_username(event['created_by'])
+            event = Event(event['event_id'], event['event_name'], event['created_by'], event['event_category'], event['time_created'], event['event_freq'], event['start_date'], event['end_date'], event['cost_per_person'], event['link_to_connect'], event['max_capacity'], event['location'], event['criteria'], event['event_description'] , event['event_status'], event['min_age'], event['max_age'], event['event_city'], event['event_state'], event['covid_test'], author)
+            # print(event.event_name)
+            event_objects.append(event)
+    return event_objects
+
+def deregister_event_event_id(username, event_id):
+    database = dbconnection()
+    delete_query = "delete from user_participation where username=%s and event_id=%s"
+    database.update((username,event_id,),delete_query)
