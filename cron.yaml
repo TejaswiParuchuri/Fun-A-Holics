@@ -1,0 +1,10 @@
+cron:
+- description: "delete cancelled events"
+  url: /jobsDeleteCancelled
+  schedule: every 48 hours
+- description: "create recurring events that happen daily"
+  url: /insertDailyJobs
+  schedule: every 24 hours
+- description: "create recurring events that happen weekly"
+  url: /insertWeeklyJobs
+  schedule: every monday 09:00

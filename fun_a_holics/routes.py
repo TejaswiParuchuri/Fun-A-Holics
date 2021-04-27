@@ -1,12 +1,14 @@
 import secrets, os
 from PIL import Image
-from flask import abort,render_template, url_for, flash, redirect, request
+from flask import abort,render_template, url_for, flash, redirect, request, jsonify
 from fun_a_holics.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                              EventForm,JoinEventForm)
 from fun_a_holics.models import User, Event
 from fun_a_holics import app, bcrypt, db, current_user
 from flask_login import login_user, logout_user, login_required
 from functions import *
+from db_operations import dbconnection
+import datetime
 
 # current_user = select_user_username('Akshay')
 # current_user.is_authenticated = True
@@ -178,12 +180,15 @@ def update_event(event_id):
 
 @app.route('/event/<int:event_id>/delete', methods = ['POST'])
 def delete_event(event_id):
+    print('I am in 181')
     if not current_user or not current_user.is_authenticated:
         return redirect(url_for('home'))
     event = select_event_event_id(event_id)
     if event.created_by!= current_user.username:
         abort(403)
+    print('I am here')
     cancel_event_event_id(event_id)
+    print(send_mails_user(event_id))
     flash('Your event has been cancelled!', 'success')
     return redirect(url_for('home'))
 
@@ -245,3 +250,21 @@ def deregister_event(event_id):
     deregister_event_event_id(current_user.username,event_id)
     flash('You have deregistered from the event!', 'success')
     return redirect(url_for('home'))
+
+@app.route('/jobsDeleteCancelled') 
+def jobsDeleteCancelled():
+    database = dbconnection()
+    delete_query = "delete from events where event_status = 'cancelled' and time_created<=Date_sub(now(),interval 2 hour);"
+    database.delete( delete_query,'events')
+    return jsonify({'status':'Success'})
+
+@app.route('/insertDailyJobs')
+def insertDailyJobs():
+    insert_event_cron('Pictionary','Fun-A-Holics','games','4 hours',str(datetime.date.today() + datetime.timedelta(1))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(1))+' 07:30:00',"0","zoom link for online pictionary","10","zoom","indoor","Play pictionary whenever you are free","18","75","online","online","0")
+    return jsonify({'status':'Success'})
+
+@app.route('/insertWeeklyJobs')
+def insertWeeklyJobs():
+    #insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',"concat(date_add(curdate(),interval 6 day),' 07:00:00)","concat(date_add(curdate(),interval 6 day),' 22:30:00')","80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","sedona","arizona","1")
+    insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',str(datetime.date.today() + datetime.timedelta(1))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(1))+' 22:30:00',"80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","sedona","arizona","1")
+    return jsonify({'status':'Success'})

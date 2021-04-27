@@ -30,7 +30,7 @@ class dbconnection():
             if connection:
                 cur.close()
                 connection.close()
-                print("PostgreSQL connection is closed")
+                print("SQL connection is closed")
         return result_output
     
     def retrieveColumnNames(self,query,tablename=None):
@@ -72,7 +72,7 @@ class dbconnection():
             if connection:
                 cur.close()
                 connection.close()
-                print("PostgreSQL connection is closed")
+                print("SQL connection is closed")
 
     def update(self,values,update_query,tablename=None):
         connection = None
@@ -91,4 +91,23 @@ class dbconnection():
             if connection:
                 cur.close()
                 connection.close()
-                print("PostgreSQL connection is closed")
+                print("SQL connection is closed")
+    
+    def delete(self,delete_query,tablename=None):
+        connection = None
+        try:
+            connection = self.connect()
+            cur = connection.cursor()
+            cur.execute(delete_query)
+            connection.commit()
+            count = cur.rowcount
+            print(count, "delted the record successfully in ",tablename)
+        except (Exception) as error:
+            connection.rollback()
+            print("Failed to delete from table.", error)
+        finally:
+            # closing database connection.
+            if connection:
+                cur.close()
+                connection.close()
+                print("SQL connection is closed")

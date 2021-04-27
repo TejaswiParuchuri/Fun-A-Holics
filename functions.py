@@ -1,5 +1,6 @@
 from db_operations import dbconnection
 from fun_a_holics.models import User, Event, UserParticipation
+from fun_a_holics import MailingService
 
 def insert_user(username, password, email_id, age):
     values = tuple([username, password, email_id, age])
@@ -115,3 +116,47 @@ def deregister_event_event_id(username, event_id):
     database = dbconnection()
     delete_query = "delete from user_participation where username=%s and event_id=%s"
     database.update((username,event_id,),delete_query)
+
+def send_mails_user(event_id):
+    database = dbconnection()
+    users_query = "select email_id from users where username in (select username from user_participation where event_id = %s)"
+    user_names = database.get_result_from_query((event_id,), users_query)
+    to_mail=[]
+    if user_names:
+        for mail_id in user_names:
+            to_mail.append(mail_id['email_id'])
+        print(to_mail)
+        text_send="We regret to let you know that event "+ str(event_id)+ " is cancelled. Hence you no longer can participate"
+        MailingService.send_mail(text=text_send,subject='Event Cancellation Update',to_emails=to_mail)
+    return user_names
+
+def insert_event_cron(event_name, created_by, event_category, event_freq,start_date, end_date, cost_per_person, link_to_connect, max_capacity, location, criteria, event_description ,  min_age, max_age , event_city , event_state , covid_test):
+    print('I am in cron')
+    values = tuple([event_name, created_by, event_category, event_freq, start_date, end_date, cost_per_person, link_to_connect, max_capacity, location, criteria, event_description ,  min_age, max_age , event_city , event_state , covid_test])
+    database = dbconnection()
+    insert_query = "insert into events(event_name, created_by, event_category,event_freq, start_date, end_date, cost_per_person, link_to_connect, max_capacity, location, criteria, event_description ,  min_age, max_age , event_city , event_state , covid_test) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+    database.insert(values,insert_query)
+
+def select_filter(age,criteria,category):
+    tuples_send=()
+    query="select * from events where "
+    if age:
+        query+=" age = %s"
+        tuples_send+=(age,)
+    if criteria:
+        if query.endswith('where '):
+            query+="criteria = %s"
+        else:
+            query+=" and criteria = %s"
+        tuples_send+=(criteria,)
+    if category:
+        if query.endswith('where '):
+            query+="category = %s"
+        else:
+            query+=" and category = %s"
+        tuples_send+=(category,)
+    if not query.endswith('where '):
+        database = dbconnection()
+        events = database.get_result_from_query(tuples_send, query)
+        return events
+    return 'NULL'
