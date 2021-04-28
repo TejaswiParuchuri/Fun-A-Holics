@@ -130,6 +130,22 @@ def send_mails_user(event_id):
         MailingService.send_mail(text=text_send,subject='Event Cancellation Update',to_emails=to_mail)
     return user_names
 
+def send_mail_to_EO(username,event_id):
+    database = dbconnection()
+    users_query = "select email_id from users where username in (select created_by from events where event_id = %s)"
+    event_owner = database.get_result_from_query((event_id,), users_query)
+    print(event_owner[0]['email_id'])
+    text_send="We want to let you know that user "+username+" has de-registered from event "+ str(event_id)+ "."
+    MailingService.send_mail(text=text_send,subject='Event '+str(event_id)+' Update',to_emails=[event_owner[0]['email_id']])
+
+def update_events_status():
+    database = dbconnection()
+    update_query = "update events set event_status = 'inprogress' where event_id in (select temp.event_id from (select event_id from events where current_timestamp between start_date and end_date and event_status not in ('cancelled')) as temp);"
+    database.update((),update_query)
+    database = dbconnection()
+    update_query = "update events set event_status = 'completed' where event_id in (select temp.event_id from (select event_id from events where current_timestamp>end_date and event_status not in ('cancelled','completed')) as temp);"
+    database.update((),update_query)
+
 def insert_event_cron(event_name, created_by, event_category, event_freq,start_date, end_date, cost_per_person, link_to_connect, max_capacity, location, criteria, event_description ,  min_age, max_age , event_city , event_state , covid_test):
     print('I am in cron')
     values = tuple([event_name, created_by, event_category, event_freq, start_date, end_date, cost_per_person, link_to_connect, max_capacity, location, criteria, event_description ,  min_age, max_age , event_city , event_state , covid_test])
@@ -141,7 +157,7 @@ def select_filter(age,criteria,category):
     tuples_send=()
     query="select * from events where "
     if age:
-        query+=" age = %s"
+        query+=" %s between min_age and max_age"
         tuples_send+=(age,)
     if criteria:
         if query.endswith('where '):
@@ -151,9 +167,9 @@ def select_filter(age,criteria,category):
         tuples_send+=(criteria,)
     if category:
         if query.endswith('where '):
-            query+="category = %s"
+            query+="event_category = %s"
         else:
-            query+=" and category = %s"
+            query+=" and event_category = %s"
         tuples_send+=(category,)
     if not query.endswith('where '):
         database = dbconnection()

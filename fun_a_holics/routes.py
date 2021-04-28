@@ -248,13 +248,17 @@ def deregister_event(event_id):
     if not current_user or not current_user.is_authenticated:
         return redirect(url_for('home'))
     deregister_event_event_id(current_user.username,event_id)
+    send_mail_to_EO(current_user.username,event_id)
     flash('You have deregistered from the event!', 'success')
     return redirect(url_for('home'))
 
 @app.route('/jobsDeleteCancelled') 
 def jobsDeleteCancelled():
     database = dbconnection()
-    delete_query = "delete from events where event_status = 'cancelled' and time_created<=Date_sub(now(),interval 2 hour);"
+    delete_query = "delete from user_participation where event_id in (select event_id from events where event_status in ('cancelled','completed') and end_date<=Date_sub(now(),interval 9 day));"
+    database.delete( delete_query,'user_participation')
+    database = dbconnection()
+    delete_query = "delete from events where event_status in ('cancelled','completed') and end_date<=Date_sub(now(),interval 9 day);"
     database.delete( delete_query,'events')
     return jsonify({'status':'Success'})
 
@@ -266,5 +270,11 @@ def insertDailyJobs():
 @app.route('/insertWeeklyJobs')
 def insertWeeklyJobs():
     #insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',"concat(date_add(curdate(),interval 6 day),' 07:00:00)","concat(date_add(curdate(),interval 6 day),' 22:30:00')","80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","sedona","arizona","1")
-    insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',str(datetime.date.today() + datetime.timedelta(1))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(1))+' 22:30:00',"80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","sedona","arizona","1")
+    insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',str(datetime.date.today() + datetime.timedelta(6))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(6))+' 22:30:00',"80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","sedona","arizona","1")
+    #print(select_filter(None,None,'dance'))
+    return jsonify({'status':'Success'})
+
+@app.route('/cronUpdateEventStatus')
+def cronUpdateEventStatus():
+    update_events_status()
     return jsonify({'status':'Success'})
