@@ -65,7 +65,7 @@ class EventForm(FlaskForm):
 
 class JoinEventForm(FlaskForm):
     # age = IntegerField('Age',render_kw={'disabled':''}, validators=[DataRequired(), NumberRange(max=60, message="Max age is 60 years")])
-    covid_status =  BooleanField('Do you have a Covid -ve PCR test result?')
+    covid_status =  BooleanField('Can you display a covid -ve PCR test result at the event?')
     submit = SubmitField('Join')
 
 class FilterForm(FlaskForm):
@@ -73,7 +73,7 @@ class FilterForm(FlaskForm):
                   "movies", "games", "fitness", "dance","other"]
     criterias = ["select","indoor", "outdoor"]
     event_statuses = ["select","completed", "inprogress", "active", "cancelled"]
-    costs = ["select"]+[str(i)+"-"+str(i+9) for i in range(1,100,10)]
+    costs = ["select"]+[str(i)+"-"+str(i+9) for i in range(0,100,10)]
     event_category = SelectField(
         u'Category', choices=categories)
     criteria  = SelectField(

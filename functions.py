@@ -76,7 +76,7 @@ def insert_user_participation(username, event_id, covid_status):
     db.session.commit()
 
 def delete_user_participations_event_id(event_id):
-    select_user_participation_event_id(event_id)
+    user_participations = select_user_participation_event_id(event_id)
     for user_participation in user_participations:
         db.session.delete(user_participation)
     db.session.commit()

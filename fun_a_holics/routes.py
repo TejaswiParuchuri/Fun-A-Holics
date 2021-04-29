@@ -45,11 +45,14 @@ def filter_events():
 
 @app.route('/testScaling')
 def testScaling():
-    start = time.time()
-    events = select_all_events_event_status(event_status='active')
-    load_all_cores(duration_s=30, target_load=0.7)
-    end = time.time()
-    return jsonify({'status':'Success, events retrieved '+str(len(events))+', Time take:'+str(end-start)})
+    try:
+        start = time.time()
+        events = select_all_events_event_status(event_status='active')
+        load_all_cores(duration_s=30, target_load=0.7)
+        end = time.time()
+        return jsonify({'status':'Success, events retrieved '+str(len(events))+', Time take:'+str(end-start)})
+    except Exception as e:
+        return jsonify({'status': 'ERROR : '+str(e)})
 
 @app.route('/about')
 def about():
@@ -204,8 +207,8 @@ def delete_event(event_id):
         abort(403)
     print('I am here')
     cancel_event_event_id(event_id)
-    delete_user_participations_event_id(event_id)
     print(send_mails_user(event_id))
+    delete_user_participations_event_id(event_id)
     flash('Your event has been cancelled!', 'success')
     return redirect(url_for('home'))
 
@@ -273,9 +276,9 @@ def deregister_event(event_id):
 @app.route('/jobsDeleteCancelled') 
 def jobsDeleteCancelled():
     try:
-        delete_query = "delete from user_participation where event_id in (select event_id from events where event_status in ('cancelled','completed') and end_date<=Date_sub(now(),interval 9 day));"
+        delete_query = "delete from user_participation where event_id in (select event_id from events where event_status in ('cancelled','completed') and end_date<=Date_sub(now(),interval 7 day));"
         db.engine.execute(delete_query)
-        delete_query = "delete from events where event_status in ('cancelled','completed') and end_date<=Date_sub(now(),interval 9 day);"
+        delete_query = "delete from events where event_status in ('cancelled','completed') and end_date<=Date_sub(now(),interval 7 day);"
         db.engine.execute(delete_query)
         return jsonify({'status':'Success'})
     except Exception as e:
@@ -284,7 +287,10 @@ def jobsDeleteCancelled():
 @app.route('/insertDailyJobs')
 def insertDailyJobs():
     try:
-        insert_event_cron('Pictionary','Fun-A-Holics','games','4 hours',str(datetime.date.today() + datetime.timedelta(1))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(1))+' 07:30:00',"0","zoom link for online pictionary","10","zoom","indoor","Play pictionary whenever you are free","18","75","online","online","0")
+        for i in range(0,24,4):
+            insert_event_cron('Pictionary','Fun-A-Holics','games','4 hours',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':00:00',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':30:00',"0","zoom link for online pictionary","10","zoom","indoor","Play pictionary whenever you are free","18","75","online","online","0")
+            insert_event_cron('Drawing competition','Akshay','art','daily',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':00:00',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i+1)+':00:00',"0","zoom link for drawing competition","40","zoom","indoor","This is the daily event for this semester, where we are conducting a drawing.","10","40","online","online","0")
+        insert_event_cron('Daily \'A\'-Mountain Hike','Tejaswi','hiking','daily',str(datetime.date.today() + datetime.timedelta(1))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(1))+' 08:00:00',"0","N/A","20","A-Mountain","outdoor","This is the daily hiking event to \'A\'-Mountain.","20","40","Tempe","Arizona","1")
         return jsonify({'status':'Success'})
     except Exception as e:
         return jsonify({'status':'insertDailyJobsError'+" : "+str(e)})
@@ -293,7 +299,9 @@ def insertDailyJobs():
 def insertWeeklyJobs():
     try:
         #insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',"concat(date_add(curdate(),interval 6 day),' 07:00:00)","concat(date_add(curdate(),interval 6 day),' 22:30:00')","80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","sedona","arizona","1")
-        insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',str(datetime.date.today() + datetime.timedelta(6))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(6))+' 22:30:00',"80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","sedona","arizona","1")
+        insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',str(datetime.date.today() + datetime.timedelta(6))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(6))+' 22:30:00',"80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","Sedona","Arizona","1")
+        for i in range(1,7,2):
+            insert_event_cron('Weekly Yoga Session','Kusuma','fitness','weekly',str(datetime.date.today() + datetime.timedelta(i))+' 16:00:00',str(datetime.date.today() + datetime.timedelta(i))+' 17:00:00',"0","zoom link for yoga","25","zoom","indoor","This is a weekly yoga session.","20","50","online","online","0")
         #print(select_filter(None,None,'dance'))
         return jsonify({'status':'Success'})
     except Exception as e:
