@@ -1,7 +1,7 @@
 cron:
 - description: "delete cancelled events"
   url: /jobsDeleteCancelled
-  schedule: every 72 hours
+  schedule: every 24 hours
 - description: "create recurring events that happen daily"
   url: /insertDailyJobs
   schedule: every 24 hours
