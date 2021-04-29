@@ -3,7 +3,6 @@ from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange
 from fun_a_holics.models import User
-from fun_a_holics import current_user
 from db_operations import dbconnection
 from wtforms.fields.html5 import DateTimeLocalField
 from datetime import datetime
@@ -29,7 +28,7 @@ class LoginForm(FlaskForm):
 
 
 class UpdateAccountForm(FlaskForm):
-    username = StringField('Username',
+    username = StringField('Username', render_kw={'readonly': True},
                            validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email',
                         validators=[DataRequired(), Email()])
@@ -69,3 +68,22 @@ class JoinEventForm(FlaskForm):
     # age = IntegerField('Age',render_kw={'disabled':''}, validators=[DataRequired(), NumberRange(max=60, message="Max age is 60 years")])
     covid_status =  BooleanField('Do you have a Covid -ve PCR test result?')
     submit = SubmitField('Join')
+
+class FilterForm(FlaskForm):
+    categories = ["select","hiking", "boating", "art",
+                  "movies", "games", "fitness", "dance","other"]
+    criterias = ["select","indoor", "outdoor"]
+    event_statuses = ["select","completed", "inprogress", "active", "cancelled"]
+    costs = ["select"]+[str(i)+"-"+str(i+9) for i in range(1,100,10)]
+    event_category = SelectField(
+        u'Category', choices=categories)
+    criteria  = SelectField(
+        u'Criteria ', choices=criterias )
+    min_age = IntegerField('Min age', default=0)
+    max_age = IntegerField('Max age', default=60)
+    event_status  =  SelectField('Event Status', choices=event_statuses )
+    max_capacity = IntegerField('Max capacity', default=50)
+    event_city =  StringField('Event City')
+    event_state  =  StringField('Event State')
+    cost_per_person = SelectField('Cost per person', choices=costs)
+    submit = SubmitField('Filter')
