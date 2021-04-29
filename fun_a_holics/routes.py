@@ -147,7 +147,7 @@ def new_event():
 def event(event_id):
     print('In Event ', event_id)
     join_disable = False
-    if current_user:
+    if current_user.is_authenticated:
         user_participation = select_user_participation_username_event_id(current_user.username,event_id)
         if user_participation:
             join_disable = True
