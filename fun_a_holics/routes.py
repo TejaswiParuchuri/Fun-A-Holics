@@ -7,8 +7,8 @@ from fun_a_holics.models import User, Event
 from fun_a_holics import app, bcrypt, db
 from flask_login import login_user, current_user, logout_user, login_required
 from functions import *
-from db_operations import dbconnection
 import datetime
+import time
 
 @app.context_processor
 def get_filter_form():
@@ -24,24 +24,29 @@ def home():
 
 @app.route('/filter_events', methods=["GET","POST"])
 def filter_events():
-    # try:
-    page = request.args.get('page', 1, type=int)
-    filter_form = FilterForm()
-    events = select_filter(event_category = filter_form.event_category.data,\
-                                criteria = filter_form.criteria.data,\
-                                min_age = filter_form.min_age.data,\
-                                max_age = filter_form.max_age.data,\
-                                event_status = filter_form.event_status.data,\
-                                max_capacity = filter_form.max_capacity.data,\
-                                event_city = filter_form.event_city.data,\
-                                event_state = filter_form.event_state.data,\
-                                cost_per_person = filter_form.cost_per_person.data,per_page=5, page = page)
-    print(events.pages)
-    return render_template('home.html', events=events, action="created", user=None, next_page='filter_events', filter_form = filter_form)
-    # except Exception as e:
-    #     flash('ERROR : '+str(e), 'danger')
-    #     return redirect(url_for('home'))
+    try:
+        page = request.args.get('page', 1, type=int)
+        filter_form = FilterForm()
+        events = select_filter(event_category = filter_form.event_category.data,\
+                                    criteria = filter_form.criteria.data,\
+                                    min_age = filter_form.min_age.data,\
+                                    max_age = filter_form.max_age.data,\
+                                    event_status = filter_form.event_status.data,\
+                                    max_capacity = filter_form.max_capacity.data,\
+                                    event_city = filter_form.event_city.data,\
+                                    event_state = filter_form.event_state.data,\
+                                    cost_per_person = filter_form.cost_per_person.data,per_page=5, page = page)
+        print(events.pages)
+        return render_template('home.html', events=events, action="created", user=None, next_page='filter_events', filter_form = filter_form)
+    except Exception as e:
+        flash('ERROR : '+str(e), 'danger')
+        return redirect(url_for('home'))
 
+@app.route('/testScaling')
+def testScaling():
+    events = select_all_events_event_status(event_status='active')
+    time.sleep(20)
+    return jsonify({'status':'Success, events retrieved '+str(len(events))})
 
 @app.route('/about')
 def about():

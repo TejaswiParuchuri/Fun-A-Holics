@@ -3,7 +3,6 @@ from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange
 from fun_a_holics.models import User
-from db_operations import dbconnection
 from wtforms.fields.html5 import DateTimeLocalField
 from datetime import datetime
 
