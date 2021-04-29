@@ -4,3 +4,9 @@ entrypoint: gunicorn -b :$PORT run:app
 
 runtime_config:
   python_version: 3
+
+automatic_scaling:
+  cool_down_period_sec: 120
+  cpu_utilization:
+    target_utilization: 0.6
+  target_concurrent_requests: 100

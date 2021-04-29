@@ -9,6 +9,7 @@ from flask_login import login_user, logout_user, login_required
 from functions import *
 from db_operations import dbconnection
 import datetime
+import time
 
 # current_user = select_user_username('Akshay')
 # current_user.is_authenticated = True
@@ -25,6 +26,12 @@ def home():
 @app.route('/about')
 def about():
     return render_template('about.html', title="About", current_user = current_user)
+
+@app.route('/testScaling')
+def testScaling():
+    events = select_all_events_active()
+    time.sleep(20)
+    return jsonify({'status':'Success'})
 
 @app.route('/register', methods=["GET","POST"])
 def register():
