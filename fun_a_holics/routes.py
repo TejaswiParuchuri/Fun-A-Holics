@@ -9,6 +9,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from functions import *
 import datetime
 import time
+from cpu_load_generator import load_single_core, load_all_cores
 
 @app.context_processor
 def get_filter_form():
@@ -44,9 +45,11 @@ def filter_events():
 
 @app.route('/testScaling')
 def testScaling():
+    start = time.time()
     events = select_all_events_event_status(event_status='active')
-    time.sleep(20)
-    return jsonify({'status':'Success, events retrieved '+str(len(events))})
+    load_all_cores(duration_s=30, target_load=0.7)
+    end = time.time()
+    return jsonify({'status':'Success, events retrieved '+str(len(events))+', Time take:'+str(end-start)})
 
 @app.route('/about')
 def about():
