@@ -10,7 +10,7 @@
             <div class="media-body">
             <div class="article-metadata">
                 <a class="mr-2" href="{{ url_for('user_events', username=event.user.username) }}">{{ event.user.username }}</a>
-                <small class="text-muted">{{ event.time_created.strftime("%m/%d/%Y, %H:%M %p") }}</small>
+                <small class="text-muted">{{ event.start_date.strftime("%m/%d/%Y, %H:%M %p") }}</small>
             </div>
             <h2><a class="article-title" href="{{ url_for('event',event_id=event.event_id) }}">{{ event.event_name }}</a></h2>
             <p class="article-content">{{ event.event_description }}</p>

@@ -69,7 +69,7 @@ def testScaling():
     try:
         start = time.time()
         events = select_all_events_event_status(event_status='active')
-        load_all_cores(duration_s=30, target_load=0.7)
+        load_all_cores(duration_s=30, target_load=0.6)
         end = time.time()
         return jsonify({'status':'Success, events retrieved '+str(len(events))+', Time take:'+str(end-start)})
     except Exception as e:
@@ -315,8 +315,8 @@ def jobsDeleteCancelled():
 def insertDailyJobs():
     try:
         for i in range(0,24,4):
-            insert_event_cron('Pictionary','Fun-A-Holics','games','4 hours',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':00:00',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':30:00',"0","zoom link for online pictionary","10","zoom","indoor","Play pictionary whenever you are free","18","75","online","online","0")
-            insert_event_cron('Drawing competition','Akshay','art','daily',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':00:00',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i+1)+':00:00',"0","zoom link for drawing competition","40","zoom","indoor","This is the daily event for this semester, where we are conducting a drawing.","10","40","online","online","0")
+            insert_event_cron('Pictionary','Fun-A-Holics','games','4 hours',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':00:00',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':30:00',"0","zoom link for online pictionary","10","zoom","indoor","Play pictionary whenever you are free","18","60","online","online","0")
+            insert_event_cron('Drawing competition','Akshay','art','4 hours',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':00:00',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i+1)+':00:00',"0","zoom link for drawing competition","40","zoom","indoor","This is the daily event for this semester, where we are conducting a drawing.","10","40","online","online","0")
         insert_event_cron('Movie Night','Harry Peter','movies','daily',str(datetime.date.today() + datetime.timedelta(1))+' 20:30:00',str(datetime.date.today() + datetime.timedelta(1))+' 23:30:00',"0","zoom link for movie","30","zoom","indoor","This is the daily movie night show event.","10","40","online","online","0")
         insert_event_cron('Daily \'A\'-Mountain Hike','Tejaswi','hiking','daily',str(datetime.date.today() + datetime.timedelta(1))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(1))+' 08:00:00',"0","N/A","20","A-Mountain","outdoor","This is the daily hiking event to \'A\'-Mountain.","20","40","Tempe","Arizona","1")
         return jsonify({'status':'Success'})
@@ -331,6 +331,7 @@ def insertWeeklyJobs():
         insert_event_cron('Arizona Boating & Watersports Event','Fun-A-Holics','boating','weekly',str(datetime.date.today() + datetime.timedelta(6))+' 16:00:00',str(datetime.date.today() + datetime.timedelta(6))+' 21:30:00',"50","NULL","35","AZ YACHT CLUB","outdoor","Downstream – Arizona Boating & Watersports Events is a continuing list of outstanding events that take place in and around Arizona throughout the year.","20","50","Tempe","Arizona","1")
         for i in range(1,7,2):
             insert_event_cron('Weekly Yoga Session','Kusuma','fitness','weekly',str(datetime.date.today() + datetime.timedelta(i))+' 16:00:00',str(datetime.date.today() + datetime.timedelta(i))+' 17:00:00',"0","zoom link for yoga","25","zoom","indoor","This is a weekly yoga session.","20","50","online","online","0")
+            insert_event_cron('Weekly DANCE 101 Session','James Gordon','dance','weekly',str(datetime.date.today() + datetime.timedelta(i))+' 19:00:00',str(datetime.date.today() + datetime.timedelta(i))+' 20:00:00',"20","zoom link for yoga","15","zoom","indoor","DANCE 101 takes great pride in offering quality dance classes at affordable prices to Tempe, Mesa, Chandler and surrounding communities.","20","50","online","online","0")
         #print(select_filter(None,None,'dance'))
         return jsonify({'status':'Success'})
     except Exception as e:
