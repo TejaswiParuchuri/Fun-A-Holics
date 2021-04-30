@@ -12,9 +12,11 @@ app = Flask(__name__)
 result = []
 
 @app.route('/ping', methods=["GET"])
-def ping():
+def ping(thread_name):
     response = {"success": True}
-    return jsonify(response), 200
+    print(thread_name ," done:" , len(result))
+    result.append(response)
+    return result
 
 def request_data(thread_name):
     start = time.time()
@@ -37,11 +39,13 @@ def request_data(thread_name):
 def posts():
     try:
         start = time.time()
-        no_of_threads = 20
+        no_of_threads = 10
         uploadThreads = []
         for i in range(no_of_threads):
             tthread = threading.Thread(
                 target=request_data, args=("Thread"+str(i+1),))
+            # tthread = threading.Thread(
+            #     target=ping, args=("Thread"+str(i+1),))
             tthread.start()
             uploadThreads.append(tthread)
 
