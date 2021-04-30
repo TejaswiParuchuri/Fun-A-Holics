@@ -13,9 +13,9 @@ result = []
 
 @app.route('/ping', methods=["GET"])
 def ping(thread_name):
-    response = {"success": True}
-    print(thread_name ," done:" , len(result))
+    response = {"status": "Success"}
     result.append(response)
+    print(thread_name ," requests done : " , len(result))
     return result
 
 def request_data(thread_name):
@@ -38,14 +38,16 @@ def request_data(thread_name):
 @app.route('/posts', methods=["GET"])
 def posts():
     try:
+        global result
+        result = []
         start = time.time()
-        no_of_threads = 10
+        no_of_threads = 20
         uploadThreads = []
         for i in range(no_of_threads):
             tthread = threading.Thread(
                 target=request_data, args=("Thread"+str(i+1),))
             # tthread = threading.Thread(
-            #     target=ping, args=("Thread"+str(i+1),))
+            #     target=ping, args=("Thread-"+str(i+1),))
             tthread.start()
             uploadThreads.append(tthread)
 
