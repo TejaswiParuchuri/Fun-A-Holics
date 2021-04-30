@@ -10,7 +10,7 @@ from functions import *
 import datetime
 import time
 from cpu_load_generator import load_single_core, load_all_cores
-
+from flask import  session
 @app.context_processor
 def get_filter_form():
   return {"filter_form": FilterForm()}
@@ -28,16 +28,37 @@ def filter_events():
     try:
         page = request.args.get('page', 1, type=int)
         filter_form = FilterForm()
-        events = select_filter(event_category = filter_form.event_category.data,\
-                                    criteria = filter_form.criteria.data,\
-                                    min_age = filter_form.min_age.data,\
-                                    max_age = filter_form.max_age.data,\
-                                    event_status = filter_form.event_status.data,\
-                                    max_capacity = filter_form.max_capacity.data,\
-                                    event_city = filter_form.event_city.data,\
-                                    event_state = filter_form.event_state.data,\
-                                    cost_per_person = filter_form.cost_per_person.data,per_page=5, page = page)
-        print(events.pages)
+        if filter_form.validate_on_submit():
+            events = select_filter(event_category = filter_form.event_category.data,\
+                                        criteria = filter_form.criteria.data,\
+                                        min_age = filter_form.min_age.data,\
+                                        max_age = filter_form.max_age.data,\
+                                        event_status = filter_form.event_status.data,\
+                                        max_capacity = filter_form.max_capacity.data,\
+                                        event_city = filter_form.event_city.data,\
+                                        event_state = filter_form.event_state.data,\
+                                        cost_per_person = filter_form.cost_per_person.data,per_page=5, page = page)
+            session['filter_events'] = {"event_category" : filter_form.event_category.data,\
+                                        "criteria" : filter_form.criteria.data,\
+                                        "min_age" : filter_form.min_age.data,\
+                                        "max_age" : filter_form.max_age.data,\
+                                        "event_status" : filter_form.event_status.data,\
+                                        "max_capacity" : filter_form.max_capacity.data,\
+                                        "event_city" : filter_form.event_city.data,\
+                                        "event_state" : filter_form.event_state.data,\
+                                        "cost_per_person" : filter_form.cost_per_person.data}
+        else:
+            if "filter_events" in session:
+                event = session['filter_events']
+                events = select_filter(event_category =event['event_category'],\
+                                        criteria = event['criteria'],\
+                                        min_age = event['min_age'],\
+                                        max_age = event['max_age'],\
+                                        event_status = event['event_status'],\
+                                        max_capacity = event['max_capacity'],\
+                                        event_city = event['event_city'],\
+                                        event_state = event['event_state'],\
+                                        cost_per_person = event['cost_per_person'],per_page=5, page = page)
         return render_template('home.html', events=events, action="created", user=None, next_page='filter_events', filter_form = filter_form)
     except Exception as e:
         flash('ERROR : '+str(e), 'danger')
@@ -296,6 +317,7 @@ def insertDailyJobs():
         for i in range(0,24,4):
             insert_event_cron('Pictionary','Fun-A-Holics','games','4 hours',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':00:00',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':30:00',"0","zoom link for online pictionary","10","zoom","indoor","Play pictionary whenever you are free","18","75","online","online","0")
             insert_event_cron('Drawing competition','Akshay','art','daily',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i)+':00:00',str(datetime.date.today() + datetime.timedelta(1))+' '+str(i+1)+':00:00',"0","zoom link for drawing competition","40","zoom","indoor","This is the daily event for this semester, where we are conducting a drawing.","10","40","online","online","0")
+        insert_event_cron('Movie Night','Harry Peter','movies','daily',str(datetime.date.today() + datetime.timedelta(1))+' 20:30:00',str(datetime.date.today() + datetime.timedelta(1))+' 23:30:00',"0","zoom link for movie","30","zoom","indoor","This is the daily movie night show event.","10","40","online","online","0")
         insert_event_cron('Daily \'A\'-Mountain Hike','Tejaswi','hiking','daily',str(datetime.date.today() + datetime.timedelta(1))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(1))+' 08:00:00',"0","N/A","20","A-Mountain","outdoor","This is the daily hiking event to \'A\'-Mountain.","20","40","Tempe","Arizona","1")
         return jsonify({'status':'Success'})
     except Exception as e:
@@ -306,6 +328,7 @@ def insertWeeklyJobs():
     try:
         #insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',"concat(date_add(curdate(),interval 6 day),' 07:00:00)","concat(date_add(curdate(),interval 6 day),' 22:30:00')","80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","sedona","arizona","1")
         insert_event_cron('DayTrip to Sedona','Fun-A-Holics','hiking','weekly',str(datetime.date.today() + datetime.timedelta(6))+' 07:00:00',str(datetime.date.today() + datetime.timedelta(6))+' 22:30:00',"80","NULL","15","sedona","outdoor","This is a day trip to Sedona devils bridge hike and other famous spots","20","50","Sedona","Arizona","1")
+        insert_event_cron('Arizona Boating & Watersports Event','Fun-A-Holics','boating','weekly',str(datetime.date.today() + datetime.timedelta(6))+' 16:00:00',str(datetime.date.today() + datetime.timedelta(6))+' 21:30:00',"50","NULL","35","AZ YACHT CLUB","outdoor","Downstream – Arizona Boating & Watersports Events is a continuing list of outstanding events that take place in and around Arizona throughout the year.","20","50","Tempe","Arizona","1")
         for i in range(1,7,2):
             insert_event_cron('Weekly Yoga Session','Kusuma','fitness','weekly',str(datetime.date.today() + datetime.timedelta(i))+' 16:00:00',str(datetime.date.today() + datetime.timedelta(i))+' 17:00:00',"0","zoom link for yoga","25","zoom","indoor","This is a weekly yoga session.","20","50","online","online","0")
         #print(select_filter(None,None,'dance'))

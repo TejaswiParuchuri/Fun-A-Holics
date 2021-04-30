@@ -17,6 +17,13 @@
             </div>
         </article>
     {% endfor %}
+    {% if events.total==0 %}
+    <article class="media content-section">
+        <div class="media-body">
+        <p class="article-content">No Events with these filters</p>
+        </div>
+    </article>
+    {% endif %}
     {% if events.pages>1 %}
         {% for page_num in events.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
             {% if page_num %}

@@ -1,6 +1,6 @@
 from fun_a_holics.models import User, Event, UserParticipation
 from fun_a_holics import MailingService
-from fun_a_holics import db
+from fun_a_holics import db, app
 from sqlalchemy.sql import text
 
 def insert_user(username, password, email_id, age):
@@ -54,15 +54,15 @@ def select_event_event_id(event_id):
 
 def select_all_events_event_status(event_status, per_page=None, page = None):
     if not per_page or not page:
-        return Event.query.filter_by(event_status = event_status).order_by(Event.time_created.asc()).all()
+        return Event.query.filter_by(event_status = event_status).order_by(Event.start_date.asc()).all()
     else:
-        return Event.query.filter_by(event_status = event_status).order_by(Event.time_created.asc()).paginate(per_page=per_page, page = page)
+        return Event.query.filter_by(event_status = event_status).order_by(Event.start_date.asc()).paginate(per_page=per_page, page = page)
 
 def select_all_events_username(username,per_page=None, page = None):
     if not per_page or not page:
-        return Event.query.filter_by(created_by = username).order_by(Event.time_created.asc()).all()
+        return Event.query.filter_by(created_by = username).order_by(Event.start_date.asc()).all()
     else:
-        return Event.query.filter_by(created_by = username).order_by(Event.time_created.asc()).paginate(per_page=per_page, page = page)
+        return Event.query.filter_by(created_by = username).order_by(Event.start_date.asc()).paginate(per_page=per_page, page = page)
 
 def cancel_event_event_id(event_id):
     event = Event.query.filter_by(event_id = event_id).first()
@@ -91,11 +91,11 @@ def select_all_joined_events(username,per_page=None, page = None):
     if not per_page or not page:
         events = Event.query.join(UserParticipation, UserParticipation.event_id == Event.event_id)  \
                             .filter(UserParticipation.username == username)\
-                            .order_by(Event.time_created.asc()).all()
+                            .order_by(Event.start_date.asc()).all()
     else:
         events = Event.query.join(UserParticipation, UserParticipation.event_id == Event.event_id)  \
                         .filter(UserParticipation.username == username)\
-                        .order_by(Event.time_created.asc()).paginate(per_page=per_page, page = page)
+                        .order_by(Event.start_date.asc()).paginate(per_page=per_page, page = page)
     return events
 
 
@@ -141,6 +141,7 @@ def insert_event_cron(event_name, created_by, event_category, event_freq,start_d
 
 def select_filter(event_category, criteria, min_age, max_age, event_status, max_capacity, event_city, event_state, cost_per_person,per_page=None, page = None):
     events_orm = Event.query
+    print(event_category, criteria, min_age, max_age, event_status, max_capacity, event_city, event_state, cost_per_person,per_page, page)
     if event_category and event_category!="select":
         events_orm = events_orm.filter_by(event_category = event_category)
     if criteria and criteria!="select":
@@ -157,7 +158,7 @@ def select_filter(event_category, criteria, min_age, max_age, event_status, max_
         events_orm = events_orm.filter_by(event_state = event_state)
     if cost_per_person and cost_per_person!="select":
         costs = cost_per_person.split("-")
-        events_orm = events_orm.filter(Event.cost_per_person >= int(costs[0]))
-        events_orm = events_orm.filter(Event.cost_per_person <= int(costs[1]))
-    events = events_orm.order_by(Event.time_created.asc()).paginate(per_page=per_page, page = page)
+        events_orm = events_orm.filter((Event.cost_per_person >= costs[0]) , (Event.cost_per_person <= costs[1]))
+    # app.logger.info("[select_filter method] "+str(events_orm))
+    events = events_orm.order_by(Event.start_date.asc()).paginate(per_page=per_page, page = page)
     return events
