@@ -2,30 +2,39 @@
 
 {% block content %}
     {% if user.username %}
-    <h1 class="mb-3">Events {{ action }} by {{ user.username }} ({{ total }}) </h1>
+    <h1 class="mb-3">Events {{ action }} by {{ user.username }} ({{ events.total }}) </h1>
     {% endif %}
-    {% for event in events %}
+    {% for event in events.items %}
         <article class="media content-section">
-            <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/'+event.author.image_file) }}" alt="">
+            <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/'+event.user.image_file) }}" alt="">
             <div class="media-body">
             <div class="article-metadata">
-                <a class="mr-2" href="{{ url_for('user_events', username=event.author.username) }}">{{ event.author.username }}</a>
-                <small class="text-muted">{{ event.time_created.strftime('%Y-%m-%d') }}</small>
+                <a class="mr-2" href="{{ url_for('user_events', username=event.user.username) }}">{{ event.user.username }}</a>
+                <small class="text-muted">{{ event.start_date.strftime("%m/%d/%Y, %H:%M %p") }}</small>
             </div>
             <h2><a class="article-title" href="{{ url_for('event',event_id=event.event_id) }}">{{ event.event_name }}</a></h2>
             <p class="article-content">{{ event.event_description }}</p>
             </div>
         </article>
     {% endfor %}
-    {# {% for page_num in events.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-        {% if page_num %}
-            {% if events.page == page_num %}
-                <a class="btn btn-info mb-4"  href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+    {% if events.total==0 %}
+    <article class="media content-section">
+        <div class="media-body">
+        <p class="article-content">No Events with these filters</p>
+        </div>
+    </article>
+    {% endif %}
+    {% if events.pages>1 %}
+        {% for page_num in events.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+                {% if events.page == page_num %}
+                    <a class="btn btn-info mb-4"  href="{{ url_for(next_page,username = user.username, page=page_num) }}">{{ page_num }}</a>
+                {% else %}
+                    <a class="btn btn-outline-info mb-4"  href="{{ url_for(next_page,username = user.username, page=page_num) }}">{{ page_num }}</a>
+                {% endif %}    
             {% else %}
-                <a class="btn btn-outline-info mb-4"  href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
-            {% endif %}    
-        {% else %}
-            ...
-        {% endif %}
-    {% endfor %} #}
+                ...
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 {% endblock content %}

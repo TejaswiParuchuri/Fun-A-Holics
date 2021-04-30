@@ -3,37 +3,56 @@
 {% block content %}
 <article class="media content-section">
   <img class="rounded-circle article-img"
-    src="{{ url_for('static', filename='profile_pics/'+event.author.image_file) }}" alt="">
+    src="{{ url_for('static', filename='profile_pics/'+event.user.image_file) }}" alt="">
   <div class="media-body">
     <div class="article-metadata">
-      <a class="mr-2" href="{{ url_for('user_events', username=event.author.username) }}">{{ event.author.username
+      <a class="mr-2" href="{{ url_for('user_events', username=event.user.username) }}">{{ event.user.username
         }}</a>
-      <small class="text-muted">{{ event.time_created.strftime('%Y-%m-%d') }}</small>
+      <small class="text-muted">{{ event.start_date.strftime("%m/%d/%Y, %H:%M %p") }}</small>
+      {% if event.event_status == 'completed' or event.event_status == 'inprogress'%}
+        <label class="text-success btn-sm mt-1 mb-1" >{{ event.event_status }}</label>
+      {% endif %}
+      {% if event.event_status == 'cancelled' %}
+        <label class="text-danger btn-sm mt-1 mb-1" >{{ event.event_status }}</label>
+      {% endif %}
       {% if current_user.is_authenticated %}
         {% if event.created_by == current_user.username %}
-        <div>
-          <a class="btn btn-secondary btn-sm mt-1 mb-1"
-            href="{{ url_for('update_event', event_id = event.event_id) }}">Update</a>
-          <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal"
-            data-target="#deleteModal">Cancel</button>
-        </div>
+          {% if event.event_status == 'active' %}
+          <div>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1"
+              href="{{ url_for('update_event', event_id = event.event_id) }}">Update</a>
+            <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal"
+              data-target="#deleteModal">Cancel</button>
+          </div>
+          {% endif %}
         {% else %}
-          {% if not join_disable %}
-            <a class="btn btn-success btn-sm mt-1 mb-1" href="{{ url_for('join_event', event_id = event.event_id) }}">Join</a>
-          {% else %}
-          <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal"
-            data-target="#deregisterModal">De-register</button>
+          {% if event.event_status == 'active' %}
+            {% if available_slots>0 %}
+              {% if not join_disable %}
+                <a class="btn btn-success btn-sm mt-1 mb-1" href="{{ url_for('join_event', event_id = event.event_id) }}">Join</a>
+              {% else %}
+              <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal"
+                data-target="#deregisterModal">De-register</button>
+              {% endif %}
+            {% else %}
+            <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal"
+              data-target="#">Full</button>
+            {% endif %}
           {% endif %}
         {% endif %}
       {% endif %}
     </div>
-    <h2 class="article-title">{{ event.event_name }}</h2>
-    <p class="article-content">{{ event.event_description }}</p>
+    <h2 class="article-title">{{ event.event_name }} </h2>
+    {% if event.event_status == 'active' and available_slots>0 %}
+    <span class="text-danger">Hurry up, available slots are just {{ available_slots }}!</span>
+    <br>
+    {% endif %}<br>
+    <p class="article-content">{{ event.event_description }} </p>
     <p class="article-content">Event Category: {{ event.event_category }}</p>
     {% if event.event_freq %}
     <p class="article-content">Event Frequency {{ event.event_freq }}</p>
     {% endif %}
-    <p class="article-content">Event is scheduled from {{ event.start_date }} to {{ event.end_date }}</p>
+    <p class="article-content">Event is scheduled from {{ event.start_date.strftime("%m/%d/%Y, %H:%M %p") }} to {{ event.end_date.strftime("%m/%d/%Y, %H:%M %p") }}</p>
     {% if event.cost_per_person>0 %}
     <p class="article-content">Event cost per person: {{ event.cost_per_person }}</p>
     {% endif %}

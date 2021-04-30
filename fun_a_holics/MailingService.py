@@ -28,5 +28,3 @@ def send_mail(text='Email Body', subject='Hello World', from_email='Fun-A-Holics
     server.login(username,password)
     server.sendmail(from_email,to_emails,msg_str)
     server.quit()
-
-

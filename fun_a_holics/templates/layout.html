@@ -64,15 +64,133 @@
         </div>
         <div class="col-md-4">
         <div class="content-section">
-            <h3>Our Sidebar</h3>
-            <p class='text-muted'>You can put any information here you'd like.
-            <ul class="list-group">
-                <li class="list-group-item list-group-item-light">Latest Events</li>
-                <li class="list-group-item list-group-item-light">Announcements</li>
-                <li class="list-group-item list-group-item-light">Calendars</li>
-                <li class="list-group-item list-group-item-light">etc</li>
-            </ul>
-            </p>
+            <h3>Filter Events</h3>
+            <p class='text-muted'>You can filter the events using the following fields.</p>
+            <form method="POST" action="{{url_for('filter_events')}}">
+              {{ filter_form.hidden_tag() }}
+              <fieldset class="form-group">
+                  <div class="form-group">
+                      {{ filter_form.event_category.label(class="form-control-label") }}
+                      {% if filter_form.event_category.errors %}
+                      {{ filter_form.event_category(class="form-control form-control-lg is-invalid") }}
+                          <div class="invalid-feedback">
+                              {% for error in filter_form.event_category.errors %}
+                                  <span> {{ error }} </span>
+                              {% endfor %}
+                          </div>
+                      {% else %}
+                          {{ filter_form.event_category(class="form-control form-control-lg") }}
+                      {% endif %}
+                  </div>
+                  <div class="form-group">
+                    {{ filter_form.criteria.label(class="form-control-label") }}
+                    {% if filter_form.criteria.errors %}
+                    {{ filter_form.criteria(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in filter_form.criteria.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ filter_form.criteria(class="form-control form-control-lg") }}
+                    {% endif %}
+                  </div>
+                  <div class="form-group">
+                    {{ filter_form.min_age.label(class="form-control-label") }}
+                    {% if filter_form.min_age.errors %}
+                    {{ filter_form.min_age(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in filter_form.min_age.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ filter_form.min_age(class="form-control form-control-lg") }}
+                    {% endif %}
+                  </div>
+                  <div class="form-group">
+                    {{ filter_form.max_age.label(class="form-control-label") }}
+                    {% if filter_form.max_age.errors %}
+                    {{ filter_form.max_age(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in filter_form.max_age.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ filter_form.max_age(class="form-control form-control-lg") }}
+                    {% endif %}
+                  </div>
+                  <div class="form-group">
+                    {{ filter_form.event_status.label(class="form-control-label") }}
+                    {% if filter_form.event_status.errors %}
+                    {{ filter_form.event_status(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in filter_form.event_status.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ filter_form.event_status(class="form-control form-control-lg") }}
+                    {% endif %}
+                  </div>
+                  <div class="form-group">
+                    {{ filter_form.max_capacity.label(class="form-control-label") }}
+                    {% if filter_form.max_capacity.errors %}
+                    {{ filter_form.max_capacity(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in filter_form.max_capacity.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ filter_form.max_capacity(class="form-control form-control-lg") }}
+                    {% endif %}
+                  </div>
+                  <div class="form-group">
+                    {{ filter_form.event_city.label(class="form-control-label") }}
+                    {% if filter_form.event_city.errors %}
+                    {{ filter_form.event_city(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in filter_form.event_city.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ filter_form.event_city(class="form-control form-control-lg") }}
+                    {% endif %}
+                  </div>
+                  <div class="form-group">
+                    {{ filter_form.event_state.label(class="form-control-label") }}
+                    {% if filter_form.event_state.errors %}
+                    {{ filter_form.event_state(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in filter_form.event_state.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ filter_form.event_state(class="form-control form-control-lg") }}
+                    {% endif %}
+                  </div>
+                  <div class="form-group">
+                    {{ filter_form.cost_per_person.label(class="form-control-label") }}
+                    {% if filter_form.cost_per_person.errors %}
+                    {{ filter_form.cost_per_person(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in filter_form.cost_per_person.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ filter_form.cost_per_person(class="form-control form-control-lg") }}
+                    {% endif %}
+                  </div>
+              </fieldset>
+              <div class="form-group">
+                  {{ filter_form.submit(class="btn btn-outline-info") }}
+              </div>
+          </form>
         </div>
         </div>
     </div>
