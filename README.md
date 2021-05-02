@@ -9,16 +9,16 @@
 
 #### Technologies used:
 
-* 👉 Front-end: HTML5, CSS, Bootstrap
-* 👉 Back-end: Python Flask framework
-* 👉 Google cloud platform PAAS services:
-  * Google App Engine
-  * Google Cloud Scheduler
-  * Google Cloud SQL
-* 👉 APIs:
-  * Google Mail API
-* 👉 Database:
-  * MySQL
+ Markup : * Front-end: HTML5, CSS, Bootstrap
+          * Back-end: Python Flask framework
+          * Google cloud platform PAAS services:
+              * Google App Engine
+              * Google Cloud Scheduler
+              * Google Cloud SQL
+          * APIs:
+              * Google Mail API
+          * Database:
+              * MySQL
 
 #### To run the application locally
 👉 Use the following commands to run the application locally.
