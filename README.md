@@ -9,15 +9,15 @@
 
 #### Technologies used:
 
- Markup : * Front-end: HTML5, CSS, Bootstrap
-          * Back-end: Python Flask framework
-          * Google cloud platform PAAS services:
+  * 👉 Front-end: HTML5, CSS, Bootstrap
+  * 👉 Back-end: Python Flask framework
+  * 👉 Google cloud platform PAAS services:
               * Google App Engine
               * Google Cloud Scheduler
               * Google Cloud SQL
-          * APIs:
+  * 👉 APIs:
               * Google Mail API
-          * Database:
+  * 👉  Database:
               * MySQL
 
 #### To run the application locally
